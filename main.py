@@ -37,10 +37,19 @@ class Card:
         window.blit(self.img, self.position)
 
 
-def draw_card(deck_id: str) -> requests.Response:
-    return requests.get(
-        f"https://www.deckofcardsapi.com/api/deck/{deck_id}/draw/?count=1"
-    )
+def draw_card(deck_id: str, player_turn: bool) -> None:
+    if player_turn:
+        player_cards.append(
+            Card(
+                PLAYER_START_X,
+                PLAYER_START_Y,
+                CARD_WIDTH,
+                CARD_HEIGHT,
+                requests.get(
+                    f"https://www.deckofcardsapi.com/api/deck/{deck_id}/draw/?count=1"
+                ),
+            )
+        )
 
 
 def update_screen(window: pygame.Surface) -> None:
@@ -51,12 +60,6 @@ def update_screen(window: pygame.Surface) -> None:
 
 
 player_cards: list[Card] = []
-player_cards.append(
-    Card(PLAYER_START_X, PLAYER_START_Y, CARD_WIDTH, CARD_HEIGHT, draw_card(deck_id))
-)
-player_cards.append(
-    Card(PLAYER_START_X, PLAYER_START_Y, CARD_WIDTH, CARD_HEIGHT, draw_card(deck_id))
-)
 
 run = True
 while run:
@@ -64,6 +67,10 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_RETURN]:
+        draw_card(deck_id, True)
 
     update_screen(window)
 
