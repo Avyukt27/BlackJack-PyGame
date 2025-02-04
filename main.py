@@ -17,7 +17,13 @@ deck_id = requests.get(
 
 class Card:
     def __init__(
-        self, x_position: int, y_position: int, width: int, height: int, response: requests.Response    ) -> None:
+        self,
+        x_position: int,
+        y_position: int,
+        width: int,
+        height: int,
+        response: requests.Response,
+    ) -> None:
         self.position = pygame.Vector2(x_position, y_position)
 
         self.card = response.json()["cards"][0]
@@ -46,8 +52,12 @@ def update_screen(window: pygame.Surface) -> None:
 
 
 player_cards: list[Card] = []
-player_cards.append(Card(PLAYER_START_X, PLAYER_START_Y, CARD_WIDTH, CARD_HEIGHT,draw_card(deck_id)))
-player_cards.append(Card(PLAYER_START_X, PLAYER_START_Y, CARD_WIDTH, CARD_HEIGHT,draw_card(deck_id)))
+player_cards.append(
+    Card(PLAYER_START_X, PLAYER_START_Y, CARD_WIDTH, CARD_HEIGHT, draw_card(deck_id))
+)
+player_cards.append(
+    Card(PLAYER_START_X, PLAYER_START_Y, CARD_WIDTH, CARD_HEIGHT, draw_card(deck_id))
+)
 
 run = True
 while run:
