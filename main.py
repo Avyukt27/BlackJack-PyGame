@@ -32,7 +32,6 @@ class Card:
         self.img = pygame.transform.scale(self.img, (width, height))
 
         self.value = self.card["value"]
-        self.suit = self.card["suit"]
 
     def draw(self, window: pygame.Surface) -> None:
         window.blit(self.img, self.position)
