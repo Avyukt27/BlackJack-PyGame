@@ -9,7 +9,7 @@ CARD_WIDTH: int = 100
 CARD_HEIGHT: int = 125
 CARD_START_X: int = 20
 PLAYER_START_Y: int = window.get_height() - CARD_HEIGHT - 10
-DEALER_START_Y: int = 10
+DEALER_START_Y: int = 30
 CARD_BACK: pygame.Surface = pygame.transform.scale(
     pygame.image.load(
         BytesIO(
