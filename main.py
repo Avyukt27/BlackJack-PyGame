@@ -4,12 +4,13 @@ from io import BytesIO
 
 pygame.init()
 window = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("BlackJack")
 
 CARD_WIDTH: int = 100
 CARD_HEIGHT: int = 125
 CARD_START_X: int = 20
 PLAYER_START_Y: int = window.get_height() - CARD_HEIGHT - 10
-DEALER_START_Y: int = 30
+DEALER_START_Y: int = 60
 CARD_BACK: pygame.Surface = pygame.transform.scale(
     pygame.image.load(
         BytesIO(
@@ -19,7 +20,10 @@ CARD_BACK: pygame.Surface = pygame.transform.scale(
     (CARD_WIDTH, CARD_HEIGHT),
 )
 
-deck_id = requests.get(
+title_font: pygame.font.Font = pygame.font.Font("Fonts/Casino.ttf", 60)
+title_surface: pygame.Surface = title_font.render("BLACKJACK", True, (255, 255, 255))
+
+deck_id: str = requests.get(
     "https://www.deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6"
 ).json()["deck_id"]
 
@@ -139,6 +143,10 @@ def update_screen(window: pygame.Surface) -> None:
 
     window.fill((0, 0, 0))
 
+    window.blit(
+        title_surface, (window.get_width() // 2 - title_surface.get_width() // 2, 5)
+    )
+
     for index, player_card in enumerate(player_cards):
         player_score += values[player_card.value]
         player_card.position.x = index * CARD_WIDTH + CARD_START_X
@@ -162,6 +170,10 @@ player_cards: list[Card] = []
 dealer_cards: list[Card] = []
 
 player_turn: bool = True
+
+window.blit(
+    title_surface, (window.get_width() // 2 - title_surface.get_width() // 2, 5)
+)
 
 draw_cards(deck_id, True, 2)
 draw_cards(deck_id, False, 2)
