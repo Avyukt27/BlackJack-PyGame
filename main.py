@@ -27,7 +27,7 @@ values: dict[str, int] = {
     "9": 9,
     "10": 10,
     "JACK": 10,
-    "QQUEEN": 10,
+    "QUEEN": 10,
     "KING": 10,
 }
 
@@ -41,6 +41,15 @@ class Card:
         height: int,
         response: requests.Response,
     ) -> None:
+        """Creates a Card object
+
+        Args:
+            x_position (int): The X position of the Card
+            y_position (int): The Y position of the Card
+            width (int): The width of the Card
+            height (int): The height of the Card
+            response (requests.Response): The Card object's response from the API
+        """
         self.position = pygame.Vector2(x_position, y_position)
 
         self.card = response.json()["cards"][0]
@@ -52,13 +61,29 @@ class Card:
         self.suit = self.card["suit"]
 
     def __repr__(self) -> str:
+        """The Representation of the Card
+
+        Returns:
+            str: VALUE of SUIT
+        """
         return f"{self.value} of {self.suit}"
 
     def draw(self, window: pygame.Surface) -> None:
+        """Sraws a card on the game window
+
+        Args:
+            window (pygame.Surface): The window to draw on
+        """
         window.blit(self.img, self.position)
 
 
 def draw_card(deck_id: str, player_turn: bool) -> None:
+    """Draws a card and places it in either the player or the dealer's hand
+
+    Args:
+        deck_id (str): The Deck ID to draw from
+        player_turn (bool): If it is the player's turn when called
+    """
     if player_turn:
         player_cards.append(
             Card(
@@ -86,10 +111,17 @@ def draw_card(deck_id: str, player_turn: bool) -> None:
 
 
 def update_screen(window: pygame.Surface) -> None:
+    """Draws all game objects on the screen
+
+    Args:
+        window (pygame.Surface): The window to draw on
+    """
     global player_score, dealer_score
 
     player_score = 0
     dealer_score = 0
+
+    window.fill((0, 0, 0))
 
     for index, player_card in enumerate(player_cards):
         player_score += values[player_card.value]
