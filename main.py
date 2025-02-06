@@ -148,8 +148,10 @@ def update_screen(window: pygame.Surface) -> None:
         dealer_score += values[dealer_card.value]
         dealer_card.position.x = index * CARD_WIDTH + CARD_START_X
 
-        if index == len(dealer_cards) - 1: dealer_card.draw(window, CARD_BACK)
-        else: dealer_card.draw(window) 
+        if index == len(dealer_cards) - 1 and dealer_score < 17:
+            dealer_card.draw(window, CARD_BACK)
+        else:
+            dealer_card.draw(window)
 
     pygame.display.update()
 
@@ -158,6 +160,8 @@ player_score: int = 0
 dealer_score: int = 0
 player_cards: list[Card] = []
 dealer_cards: list[Card] = []
+
+player_turn: bool = True
 
 draw_cards(deck_id, True, 2)
 draw_cards(deck_id, False, 2)
@@ -170,9 +174,14 @@ while run:
             run = False
 
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_RETURN]:
+    if keys[pygame.K_x] and player_turn:
         draw_cards(deck_id, True)
-        draw_cards(deck_id, False)
+    if keys[pygame.K_z] and player_turn:
+        player_turn = False
+
+    if not player_turn:
+        if dealer_score < 17:
+            draw_cards(deck_id, False)
 
     update_screen(window)
 
