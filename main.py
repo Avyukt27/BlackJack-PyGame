@@ -10,6 +10,14 @@ CARD_HEIGHT: int = 125
 CARD_START_X: int = 20
 PLAYER_START_Y: int = window.get_height() - CARD_HEIGHT - 10
 DEALER_START_Y: int = 10
+CARD_BACK: pygame.Surface = pygame.transform.scale(
+    pygame.image.load(
+        BytesIO(
+            requests.get("https://www.deckofcardsapi.com/static/img/back.png").content
+        )
+    ),
+    (CARD_WIDTH, CARD_HEIGHT),
+)
 
 deck_id = requests.get(
     "https://www.deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6"
@@ -68,46 +76,54 @@ class Card:
         """
         return f"{self.value} of {self.suit}"
 
-    def draw(self, window: pygame.Surface) -> None:
-        """Sraws a card on the game window
+    def draw(
+        self, window: pygame.Surface, other_card_image: pygame.Surface | None = None
+    ) -> None:
+        """Draws a card on the game window
 
         Args:
             window (pygame.Surface): The window to draw on
+            img (pygame.Surface | None, optional): The image of the card. Defaults to None. `None` means the value given in self.img
         """
-        window.blit(self.img, self.position)
+        image_to_draw: pygame.Surface = (
+            other_card_image if other_card_image is not None else self.img
+        )
+        window.blit(image_to_draw, self.position)
 
 
-def draw_card(deck_id: str, player_turn: bool) -> None:
-    """Draws a card and places it in either the player or the dealer's hand
+def draw_cards(deck_id: str, player_turn: bool, card_count: int = 1) -> None:
+    """Draws a number of cards and places them in either the player or the dealer's hand
 
     Args:
         deck_id (str): The Deck ID to draw from
         player_turn (bool): If it is the player's turn when called
+        card_count (int, optional): The number of cards to draw. Defaults to 1.
     """
-    if player_turn:
-        player_cards.append(
-            Card(
-                CARD_START_X,
-                PLAYER_START_Y,
-                CARD_WIDTH,
-                CARD_HEIGHT,
-                requests.get(
-                    f"https://www.deckofcardsapi.com/api/deck/{deck_id}/draw/?count=1"
-                ),
+    for _ in range(card_count):
+        if player_turn:
+            player_cards.append(
+                Card(
+                    CARD_START_X,
+                    PLAYER_START_Y,
+                    CARD_WIDTH,
+                    CARD_HEIGHT,
+                    requests.get(
+                        f"https://www.deckofcardsapi.com/api/deck/{deck_id}/draw/?count=1"
+                    ),
+                )
             )
-        )
-    else:
-        dealer_cards.append(
-            Card(
-                CARD_START_X,
-                DEALER_START_Y,
-                CARD_WIDTH,
-                CARD_HEIGHT,
-                requests.get(
-                    f"https://www.deckofcardsapi.com/api/deck/{deck_id}/draw/?count=1"
-                ),
+        else:
+            dealer_cards.append(
+                Card(
+                    CARD_START_X,
+                    DEALER_START_Y,
+                    CARD_WIDTH,
+                    CARD_HEIGHT,
+                    requests.get(
+                        f"https://www.deckofcardsapi.com/api/deck/{deck_id}/draw/?count=1"
+                    ),
+                )
             )
-        )
 
 
 def update_screen(window: pygame.Surface) -> None:
@@ -131,7 +147,9 @@ def update_screen(window: pygame.Surface) -> None:
     for index, dealer_card in enumerate(dealer_cards):
         dealer_score += values[dealer_card.value]
         dealer_card.position.x = index * CARD_WIDTH + CARD_START_X
-        dealer_card.draw(window)
+
+        if index == len(dealer_cards) - 1: dealer_card.draw(window, CARD_BACK)
+        else: dealer_card.draw(window) 
 
     pygame.display.update()
 
@@ -140,6 +158,9 @@ player_score: int = 0
 dealer_score: int = 0
 player_cards: list[Card] = []
 dealer_cards: list[Card] = []
+
+draw_cards(deck_id, True, 2)
+draw_cards(deck_id, False, 2)
 
 run = True
 while run:
@@ -150,10 +171,8 @@ while run:
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_RETURN]:
-        draw_card(deck_id, True)
-        draw_card(deck_id, False)
-
-    print(player_score, dealer_score)
+        draw_cards(deck_id, True)
+        draw_cards(deck_id, False)
 
     update_screen(window)
 
