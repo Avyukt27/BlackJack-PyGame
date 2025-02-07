@@ -2,3 +2,4 @@ requests
 pygame
 black
 mypy
+pyinstaller
