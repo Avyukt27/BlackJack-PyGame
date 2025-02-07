@@ -22,8 +22,16 @@ CARD_BACK: pygame.Surface = pygame.transform.scale(
 
 title_font: pygame.font.Font = pygame.font.Font("Fonts/Casino3DMarquee.ttf", 80)
 score_font: pygame.font.Font = pygame.font.Font("Fonts/CasinoFlat.ttf", 20)
+game_over_font: pygame.font.Font = pygame.font.Font("Fonts/CasinoFlat.ttf", 80)
 
 title_surface: pygame.Surface = title_font.render("BLACKJACK", True, (255, 255, 255))
+player_win_surface: pygame.Surface = game_over_font.render(
+    "YOU WIN", True, (255, 255, 255)
+)
+dealer_win_surface: pygame.Surface = game_over_font.render(
+    "DEALER WIN", True, (255, 255, 255)
+)
+tie_surface: pygame.Surface = game_over_font.render("IT'S A TIE", True, (255, 255, 255))
 
 deck_id: str = requests.get(
     "https://www.deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6"
@@ -175,6 +183,32 @@ def update_screen(window: pygame.Surface) -> None:
     )
     window.blit(dealer_score_surface, (CARD_START_X, DEALER_START_Y + CARD_HEIGHT + 10))
 
+    if game_over:
+        if (player_score > dealer_score or dealer_bust) and not player_bust:
+            window.blit(
+                player_win_surface,
+                (
+                    window.get_width() // 2 - player_win_surface.get_width() // 2,
+                    window.get_height() // 2 - player_win_surface.get_height() // 2,
+                ),
+            )
+        elif (dealer_score > player_score or player_bust) and not dealer_bust:
+            window.blit(
+                dealer_win_surface,
+                (
+                    window.get_width() // 2 - dealer_win_surface.get_width() // 2,
+                    window.get_height() // 2 - dealer_win_surface.get_height() // 2,
+                ),
+            )
+        else:
+            window.blit(
+                tie_surface,
+                (
+                    window.get_width() // 2 - tie_surface.get_width() // 2,
+                    window.get_height() // 2 - tie_surface.get_height() // 2,
+                ),
+            )
+
     pygame.display.update()
 
 
@@ -185,6 +219,11 @@ dealer_cards: list[Card] = []
 
 player_turn: bool = True
 
+player_bust: bool = False
+dealer_bust: bool = False
+
+game_over: bool = False
+
 draw_cards(deck_id, True, 2)
 draw_cards(deck_id, False, 2)
 
@@ -193,16 +232,28 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+            run = False
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_x] and player_turn:
-        draw_cards(deck_id, True)
-    if keys[pygame.K_z] and player_turn:
-        player_turn = False
+    if not game_over:
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_x] and player_turn:
+            draw_cards(deck_id, True)
+        if keys[pygame.K_z] and player_turn:
+            player_turn = False
 
-    if not player_turn:
-        if dealer_score < 17:
-            draw_cards(deck_id, False)
+        if player_score > 21:
+            player_bust = True
+            game_over = True
+
+        if not player_turn:
+            if dealer_score > 21:
+                dealer_bust = True
+
+            if dealer_score < 17 and not dealer_bust:
+                draw_cards(deck_id, False)
+            else:
+                game_over = True
 
     update_screen(window)
 
