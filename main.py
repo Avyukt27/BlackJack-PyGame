@@ -10,7 +10,7 @@ CARD_WIDTH: int = 100
 CARD_HEIGHT: int = 125
 CARD_START_X: int = 20
 PLAYER_START_Y: int = window.get_height() - CARD_HEIGHT - 10
-DEALER_START_Y: int = 60
+DEALER_START_Y: int = 70
 CARD_BACK: pygame.Surface = pygame.transform.scale(
     pygame.image.load(
         BytesIO(
@@ -20,7 +20,9 @@ CARD_BACK: pygame.Surface = pygame.transform.scale(
     (CARD_WIDTH, CARD_HEIGHT),
 )
 
-title_font: pygame.font.Font = pygame.font.Font("Fonts/Casino.ttf", 60)
+title_font: pygame.font.Font = pygame.font.Font("Fonts/Casino3DMarquee.ttf", 80)
+score_font: pygame.font.Font = pygame.font.Font("Fonts/CasinoFlat.ttf", 20)
+
 title_surface: pygame.Surface = title_font.render("BLACKJACK", True, (255, 255, 255))
 
 deck_id: str = requests.get(
@@ -143,10 +145,6 @@ def update_screen(window: pygame.Surface) -> None:
 
     window.fill((0, 0, 0))
 
-    window.blit(
-        title_surface, (window.get_width() // 2 - title_surface.get_width() // 2, 5)
-    )
-
     for index, player_card in enumerate(player_cards):
         player_score += values[player_card.value]
         player_card.position.x = index * CARD_WIDTH + CARD_START_X
@@ -161,6 +159,22 @@ def update_screen(window: pygame.Surface) -> None:
         else:
             dealer_card.draw(window)
 
+    player_score_surface: pygame.Surface = score_font.render(
+        str(player_score), True, (255, 255, 255)
+    )
+    dealer_score_surface: pygame.Surface = score_font.render(
+        str(dealer_score), True, (255, 255, 255)
+    )
+
+    window.blit(
+        title_surface, (window.get_width() // 2 - title_surface.get_width() // 2, 5)
+    )
+    window.blit(
+        player_score_surface,
+        (CARD_START_X, PLAYER_START_Y - player_score_surface.get_height() - 10),
+    )
+    window.blit(dealer_score_surface, (CARD_START_X, DEALER_START_Y + CARD_HEIGHT + 10))
+
     pygame.display.update()
 
 
@@ -171,16 +185,11 @@ dealer_cards: list[Card] = []
 
 player_turn: bool = True
 
-window.blit(
-    title_surface, (window.get_width() // 2 - title_surface.get_width() // 2, 5)
-)
-
 draw_cards(deck_id, True, 2)
 draw_cards(deck_id, False, 2)
 
 run = True
 while run:
-    pygame.time.Clock().tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
