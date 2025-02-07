@@ -258,4 +258,3 @@ while run:
     update_screen(window)
 
 pygame.quit()
-exit()
