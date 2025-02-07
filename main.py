@@ -5,6 +5,7 @@ from io import BytesIO
 pygame.init()
 window = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("BlackJack")
+pygame.display.set_icon(pygame.image.load("favicon.ico"))
 
 CARD_WIDTH: int = 100
 CARD_HEIGHT: int = 125
